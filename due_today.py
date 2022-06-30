@@ -8,13 +8,17 @@ import jinja2
 import pandas as pd
 
 # Local
-from IssuetrakAPI import IssuetrakAPI
+import IssuetrakAPI
+from IssuetrakAPI.utils import read_api_key
 
 
 # Initialize Globals
 # Paths:
 POST_TEMPLATE = './post_template.j2'
-SEVENTEEN_SCHEDULE = './017_schedule.csv'
+
+api_key = read_api_key('./api.key')
+api_path = 'https://harbert.issuetrak.com/api/v1'
+api = IssuetrakAPI.IssuetrakAPI(api_key['apiv1'], api_path)
 
 # Pandas settings so Will could see what he was doing on a Mac
 pd.set_option('display.max_columns', None)
@@ -42,22 +46,21 @@ def get_tickets() -> pd.DataFrame:
 		'CanIncludeNotes': False,
 	}
 
-	# Initialize API connection
-	api = IssuetrakAPI.IssuetrakAPI()
-
 	# Loop through and gather all open tickets
 	tickets = []
 	gathered_all = False
 	total = 0
 	while not gathered_all:
 		# POST search request
-		response = api.performPost('/issues/search/', '', json.dumps(request))
+		response = api.perform_post('/issues/search', '', json.dumps(request))
+		print(response.status_code)
 
 		# Convert json to python dictionary
-		data = response.read()
+		data = response.text
 		data = json.loads(data)
 
 		# Get ticket data
+		print(data)
 		tickets += data['Collection']
 
 		# Check loop status
@@ -76,11 +79,8 @@ def get_tickets() -> pd.DataFrame:
 
 # Get a dictionary of substatus ids
 def get_substatuses() -> dict:
-	# Initialize API connection
-	api = IssuetrakAPI.IssuetrakAPI()
-
 	# GET data to dictionary
-	response = api.performGet('/substatuses')
+	response = api.perform_get('/substatuses')
 	data = response.read()
 	data = json.loads(data)
 
@@ -95,11 +95,8 @@ def get_substatuses() -> dict:
 
 # Get a dictionary of IssueTypeIDs
 def get_issuetypes() -> dict:
-	# Initialize API connection
-	api = IssuetrakAPI.IssuetrakAPI()
-
 	# GET data to dictionary
-	response = api.performGet('/issuetypes')
+	response = api.perform_get('/issuetypes')
 	data = response.read()
 	data = json.loads(data)
 
