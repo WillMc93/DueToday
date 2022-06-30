@@ -60,7 +60,6 @@ def get_tickets() -> pd.DataFrame:
 		data = json.loads(data)
 
 		# Get ticket data
-		print(data)
 		tickets += data['Collection']
 
 		# Check loop status
@@ -81,7 +80,8 @@ def get_tickets() -> pd.DataFrame:
 def get_substatuses() -> dict:
 	# GET data to dictionary
 	response = api.perform_get('/substatuses')
-	data = response.read()
+	data = response.text
+	print(data)
 	data = json.loads(data)
 
 	# Get IDs and their labels into a dictionary
